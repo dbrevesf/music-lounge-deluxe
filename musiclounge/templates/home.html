@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block content %}
+	<ol class="breadcrumb">
+		<li><a href="{% url 'musiclounge:index' %}">Index</a></li>
+		<li class="active">Home</li>
+	</ol>
+	<!-- LIGHTBOX -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+		      	</div>  
+				<div class="modal-body">  
+				</div>
+				<div class="modal-footer">
+				</div>	
+			</div>
+		</div>
+	</div>
+
+	<!-- TABS -->
+	<div class="container">
+		<div id="content">
+			<ul id="tabs" class="nav nav-tabs nav-justified" data-tabs="tabs">
+				<li class="active" ><a href="#home" data-toggle="tab">home</a></li>
+				<li><a href="#friends" data-toggle="tab">friends</a></li>
+				<li><a href="#friendSugestion" data-toggle="tab">friends sugestion</a></li>
+				<li><a href="#music" data-toggle="tab">music</a></li>
+				<li><a href="#musicSugestion" data-toggle="tab">music sugestion</a></li>
+			</ul>
+
+			<div id="my-tab-content" class="tab-content">
+				
+				<div class="tab-pane active" id="home">
+					<div class="tab-pane" id="home">
+						<div class="panel panel-default">
+							<div class="panel-body">
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- FRIENDS -->
+				
+					<div class="tab-pane" id="friends">
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<div class="container">
+							   		<ul class="row">
+							   			{% if friends %}
+							   				{% for friend in friends %}
+							   					{% if admin %}
+										       		<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+										       				<p><img class="img-circle" id="usr_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></p>
+										       				<p><b>{{ friend.firstName }}</b></p>
+										       			</a>
+										       		</li>
+										       	{% else %}
+											       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+											       			<p><img class="img-circle" id="usr_{{ friend.friend.login }}" src="{{ STATIC_URL }}images/{{ friend.friend.login }}_img"/></p>
+											       			<p><b>{{ friend.friend.firstName }}</b></p>
+											       		</a>
+											       	</li>
+									    		{% endif %}
+									    	{% endfor %}
+									    {% else %}
+									    	You don't have any friends :(
+									    {% endif %}
+									   </ul>
+								</div>		
+							</div>
+						</div>
+					</div>
+				
+
+				<!-- FRIENDS SUGESTION-->
+				<div class="tab-pane" id="friendSugestion">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="container">
+						   		<ul class="row">
+						   			{% if friendSugestion %}
+						   				{% for friend in friendSugestion %}
+									       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+									       			<p><img class="img-circle" id="uss_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></p>
+									       			<p><b>{{ friend.firstName }}</b></p>
+									       		</a>
+									       	</li>
+								    	{% endfor %}
+								    {% else %}
+								    	No sugestion of friends for you :(
+								    {% endif %}
+								   </ul>
+							</div>		
+						</div>
+					</div>
+				</div>
+
+				<!-- MUSICAL ACTS -->
+
+				<div class="tab-pane" id="music">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="container">
+						   		<ul class="row">
+						   			{% if musicalActs %}
+						   				{% for act in musicalActs %}
+						   					{% if admin %}
+									       		<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+									       				<p><img class="img" id="mus_{{ act.id }}" src="{{ STATIC_URL }}images/{{ act.id }}_img"/></p>
+									       				<p><b>{{ act.title }}</b></p>
+									       			</a>
+									       		</li>
+									       	{% else %}
+										       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+										       			<p><img class="img" id="mus_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></p>
+										       			<p><b>{{ act.musicalAct.title }}</b></p>
+										       		</a>
+										       	</li>
+								    		{% endif %}
+								    	{% endfor %}
+								    {% else %}
+								    	You don't likes any musical acts :(
+								    {% endif %}
+							   </ul>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- MUSICAL ACTS SUGESTION -->
+				<div class="tab-pane" id="musicSugestion">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="container">
+						   		<ul class="row">
+						   			{% if musicalActSugestion %}
+						   				{% for act in musicalActSugestion %}
+									       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+								       			<p><img class="img" id="mss_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></p>
+								       			<p><b>{{ act.musicalAct.title }}</b></p>
+									       		</a>
+									       	</li>
+								    	{% endfor %}
+								    {% else %}
+								    	No sugestion of musical act for you :(
+								    {% endif %}
+							   </ul>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div> 
+	<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.js"></script>
+	<script type="text/javascript">
+
+		// js to improve the tabs behavior
+		jQuery(document).ready(function ($){
+
+
+			$('#tabs').tab();
+
+			$('li img').on('click',function(){       
+       			
+                var src = $(this).attr('src');
+                var id = $(this).attr('id');
+                var label = id.substring(0,4);
+
+                var img = '<img src="' + src + '" class="img-responsive"/>';
+                var header = '<h4 class="modal-title">' + id + '</h4>';
+                var closeButton = '<button class="close" data-dismiss="modal" aria-hidden="true">&times;</button>';
+    			if (label == "usr_"){
+	                var footerButton = '<button class="btn btn-danger" id="blockuser">Block</button>';
+	            }
+	            else if (label == "uss_") {
+	                var blockButton = '<button class="btn btn-danger" id="blockuser">Block</button>';
+	                var addButton = '<button class="btn btn-success" id="adduser">Add user</button>';
+	                var footerButton = blockButton+addButton;
+	            }
+	            else if (label == "mss_") {
+	                var footerButton = '<button class="btn btn-success" id="likeAct">Like</button>';
+	            }
+	            else{
+	            	var footerButton = '';
+	            }
+
+	            $('#myModal').modal();
+	            $('#myModal').on('shown.bs.modal', function(){
+	                $('#myModal .modal-body').html(img);
+	                $('#myModal .modal-header').html(closeButton+header);
+	                $('#myModal .modal-footer').html(footerButton);
+	            });
+	            $('#myModal').on('hidden.bs.modal', function(){
+	                $('#myModal .modal-body').html('');
+	            });
+           	});
+			$('#startcall').live("click",function(){
+       			postData = {}
+       			postData['origin'] = "8826"
+       			postData['destination'] = "8824"
+       			$.ajax({
+					type: "POST",
+					url: "http://localhost:5000/converja/api/calls",
+					data: JSON.stringify(postData),
+					dataType: 'json',
+				});
+			});	
+		});
+	</script>
+{% endblock %}

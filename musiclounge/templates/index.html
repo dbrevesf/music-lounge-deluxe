@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+
+	<div class="jumbotron">
+		<h1>Hello,</h1>
+		<p>welcome to Music Lounge, where your musical experience will be improved!</p>
+		<a href="{% url 'musiclounge:registration' %}/" class="btn btn-primary btn-lg active" role="button">Sign In</a>
+		<a href="{% url 'musiclounge:login' %}/" class="btn btn-success btn-lg active" role="button">Login</a>
+	</div>
+
+{% endblock %}

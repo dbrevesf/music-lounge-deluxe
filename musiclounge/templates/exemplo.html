@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link href="{{ STATIC_URL }}css/bootstrap.css" rel="stylesheet">
+		<meta charset="utf-8">
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
+	</head>
+	 
+	<body>
+	 
+	 	<!-- HEADER -->
+	 	<div class="page-header">
+			<h1>Music Lounge</h1>
+		</div>
+
+		<!-- LIGHTBOX -->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+			      	</div>  
+					<div class="modal-body">  
+					</div>
+					<div class="modal-footer">
+					</div>	
+				</div>
+			</div>
+		</div>
+
+		<!-- TABS -->
+		<div class="container">
+			<div id="content">
+				<ul id="tabs" class="nav nav-tabs nav-justified" data-tabs="tabs">
+					<li class="active" ><a href="#estatisticas" data-toggle="tab">estatisticas</a></li>
+					<li><a href="#chamadas" data-toggle="tab">chamadas</a></li>
+					<li><a href="#atendimento" data-toggle="tab">atendimento</a></li>
+				</ul>
+
+				<div id="my-tab-content" class="tab-content">
+					
+					<div class="tab-pane active" id="estatisticas">
+						<div class="tab-pane" id="estatisticas">
+							<div class="panel panel-default">
+								<div class="panel-body">
+
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="tab-pane" id="chamadas">
+						<div class="tab-pane" id="chamadas">
+							<div class="panel panel-default">
+								<div class="panel-body">
+									
+									<div class="container">
+								   		<ul class="row">
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/disponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/indisponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/ocupado.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/disponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/indisponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/ocupado.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/disponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/indisponivel.png"/></li>
+									       <li class="col-lg-2 col-md-2 col-sm-3 col-xs-4"><img src="{{ STATIC_URL }}images/ocupado.png"/></li>
+
+									   </ul>
+									</div>	
+
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="tab-pane" id="atendimento">
+						<div class="tab-pane" id="atendimento">
+							<div class="panel panel-default">
+								<div class="panel-body">
+									
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div> 
+		<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.js"></script>
+		<script type="text/javascript">
+
+			// js to improve the tabs behavior
+			jQuery(document).ready(function ($){
+
+
+				$('#tabs').tab();
+
+				$('li img').on('click',function(){       
+           			
+	                var src = $(this).attr('src');
+	                var img = '<img src="' + src + '" class="img-responsive"/>';
+	                var header = '<h4 class="modal-title">Atendente </h4>'
+	                var closeButton = '<button class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+	                var callButton  = '<button class="btn btn-primary" id="startcall">Ligar</button>'
+	                var hangUpButton = '<button class="btn btn-success" id="answercall">Atender</button>'
+	                var answerButton = '<button class="btn btn-warning" id="hangupcall">Desligar</button>'
+	                $('#myModal').modal();
+
+	                $('#myModal').on('shown.bs.modal', function(){
+	                    $('#myModal .modal-body').html(img);
+	                    $('#myModal .modal-header').html(closeButton+header);
+	                    $('#myModal .modal-footer').html(callButton+hangUpButton+answerButton);
+	                });
+
+	                $('#myModal').on('hidden.bs.modal', function(){
+	                    $('#myModal .modal-body').html('');
+	                });
+	           	});
+
+				
+				$('#startcall').live("click",function(){
+           			postData = {}
+           			postData['origin'] = "8826"
+           			postData['destination'] = "8824"
+           			$.ajax({
+						type: "POST",
+						url: "http://localhost:5000/converja/api/calls",
+						data: JSON.stringify(postData),
+						dataType: 'json',
+					});
+				});	
+				
+
+			});
+		</script>
+	</body>
+</html>

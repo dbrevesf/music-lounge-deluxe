@@ -1,0 +1,23 @@
+.grafico{
+	border: solid thin silver;
+	width: 450px;
+	height: 300px;
+	padding: 10px;
+}
+.coluna{
+	width: 80px;
+	height: 100%;
+	margin: 2px 5px;
+	float: left;
+	position: relative;
+}</P>
+
+
+.coluna .fill{
+	width: 100%;
+	position: absolute;
+	bottom: 0px;
+}
+.rotulo{
+	text-align: center;
+}

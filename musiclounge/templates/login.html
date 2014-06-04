@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+	<ol class="breadcrumb">
+		<li><a href="{% url 'musiclounge:index' %}">Index</a></li>
+		<li class="active">Login</li>
+	</ol>
+	<div class="container">
+		<div id="content" align="center">
+			<form class="form" role="form" action="{% url 'musiclounge:login' %}" method="post">
+			{% csrf_token %}
+				<div class="form-group">
+					{{ form.login }}
+				</div>
+				<input type="submit" class="btn btn-success" value="Login"></input>
+			</form>
+		</div>
+	</div>
+{% endblock %}
