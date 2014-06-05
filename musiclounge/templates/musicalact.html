@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+	
+	<ol class="breadcrumb">
+		<li><a href="{% url 'musiclounge:logout' %}">Logout</a></li>
+		<li><a href="{% url 'musiclounge:home' requester %}">Home</a></li>
+		<li class="active">{{ musicalAct.title }}'s Informations</li>
+	</ol>
+	
+	<!-- TABS -->
+	<div class="container">
+		<div id="content">
+			<ul id="tabs" class="nav nav-tabs nav-justified" data-tabs="tabs">
+				<li class="active" ><a href="#infoMusic" data-toggle="tab"><b>{{ musicalAct.title }}</b></a></li>
+				<li><a href="#similarMusicalActs" data-toggle="tab"><b>Similar Musical Acts</b></a></li>
+				<li><a href="#statistics" data-toggle="tab"><b>Statistics</b></a></li>
+			</ul>
+
+			<div id="my-tab-content" class="tab-content">
+				
+				<!-- INFO -->
+
+				<div class="tab-pane active" id="infoMusic">
+					<div class="tab-pane" id="infoMusic">
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<div id="content" align="left">
+									{% if requester == 'admin' %}
+										<form enctype="multipart/form-data" class="form-horizontal" role="form" action="{% url 'musiclounge:registration' %}" method="post">
+										{% csrf_token %}		
+									{% else %}
+										<form class="form-horizontal" role="form">
+									{% endif %}
+									  	
+									  <div class="form-group">
+									    <div class="col-sm-10">
+									      <img class="img" src="{{ STATIC_URL }}images/{{ musicalAct.id }}_img"/>
+									    </div>
+									  </div>
+
+									  <div class="form-group">
+									    <label class="col-sm-1 control-label">Title: </label>
+									    <div class="col-sm-10">
+									      {{ musicalActForm.title }}
+									    </div>
+									  </div>
+									  
+									  <div class="form-group">
+									    <label class="col-sm-1 control-label">URI: </label>
+									    <div class="col-sm-10">
+									      {{ musicalActForm.uri }}
+									    </div>
+									  </div>
+
+									  <div class="form-group">
+									    <label class="col-sm-1 control-label">Country: </label>
+									    <div class="col-sm-10">
+									      {{ musicalActForm.country }}
+									    </div>
+									  </div>
+
+									  <div class="form-group">
+									    <label class="col-sm-1 control-label">Genre: </label>
+									    <div class="col-sm-10">
+									      {{ musicalActForm.genre }}
+									    </div>
+									  </div>
+
+									  <div class="form-group">
+									    <label class="col-sm-1 control-label">Summary: </label>
+									    <div class="col-sm-10">
+									      {{ musicalActForm.summary }}
+									    </div>
+									  </div>
+
+										{% if requester == 'admin' %}
+
+											<input type="submit" class="btn btn-success" value="Update"></input>
+
+										{% endif%}
+
+
+									</form>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- SIMILAR -->
+				
+					<div class="tab-pane" id="similarMusicalActs">
+						<div class="panel panel-default">
+							<div class="panel-body">
+									
+							</div>
+						</div>
+					</div>
+				
+
+				
+				<!-- STATISTICS -->
+
+				<div class="tab-pane" id="statistics">
+					<div class="panel panel-default">
+						<div class="panel-body">
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div> 
+	<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.js"></script>
+	<script type="text/javascript">
+
+		// js to improve the tabs behavior
+		jQuery(document).ready(function ($){
+
+
+			$('#tabs').tab();
+
+		});
+	</script>
+{% endblock %}

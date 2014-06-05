@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+	<ol class="breadcrumb">
+		<li><a href="{% url 'musiclounge:index' %}">Index</a></li>
+		<li class="active">SignUp</li>
+	</ol>
+	<div class="jumbotron">
+		
+		<form enctype="multipart/form-data" class="form-horizontal" role="form" action="{% url 'musiclounge:registration' %}" method="post">
+		{% csrf_token %}		
+			<div class="form-group">
+				<label class="col-sm-1 control-label">{{ form.name.label }} </label>
+				<div class="col-sm-10">
+			    	{{ form.name }}
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-1 control-label">{{ form.login.label }} </label>
+				<div class="col-sm-10">
+			    	{{ form.login }}
+			    </div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-1 control-label"> {{ form.city.label }} </label>
+				<div class="col-sm-10">
+			    	{{ form.city }}
+			    </div>
+			</div>
+			<div class="form-group">
+			    <label for="userImg">Profile Image: </label>
+			    <input id="id_image" type="file" class="" name="image">
+		  	</div>	
+			<div class="form-group">
+				<input type="submit" class="btn btn-success" value="Sign in"></input>
+			</div>
+		</form>
+		
+	</div>
+
+{% endblock %}

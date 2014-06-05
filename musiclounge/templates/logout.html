@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+	
+	<div class="jumbotron">
+		<h1>Good bye, {{ user }}</h1>
+		<p>thank you for your visit. The Music Lounge Team hopes that you enjoyed it and will come back soon !!!</p>
+		<a href="{% url 'musiclounge:login' %}/" class="btn btn-success btn-lg active" role="button">Login again!</a>
+	</div>
+
+{% endblock %}

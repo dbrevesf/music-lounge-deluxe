@@ -5,22 +5,118 @@
 # IMPORTS
 #
 from musiclounge import models
+from random import randint
+from unicodedata import normalize
 
 import Image
 import pprint
 import math
-
-
+import os
 
 
 #
 # CONSTANTS AND DEFINITIONS
 #
 IMAGE_URL = 'musiclounge/static/images/'
+MESSAGES = ["The real trouble with reality is that there's no background music.",
+            "War doesn't determine who's right. War determines who's left.",
+            "You can't be late until you show up.",
+            "Knowledge is realizing that the street is one-way, wisdom is looking both directions anyway",
+            "Keep smiling, it makes people wonder what you're up to.",
+            "Borrow money from pessimists - they don't expect it back. ",
+            "A conscience is what hurts when all your other parts feel so good. ",
+            "Don't drink and drive you might spill your beer"]
 
 #
 # CODE
 #
+def addFriend(user, friend):
+	"""
+	This method implements the relation of friends between two users.
+
+	@params user, friend: Primary keys of User table.
+	@type user, friend: string
+
+	@rtype: boolean
+	@return: True, if success, false, if not.
+	"""
+	# check relationship
+	rel = getRelationship(user, friend)
+
+	if rel != "FRI" and rel != "ENE":
+	
+		#get user
+		user = getUser(user)
+
+		#get friend
+		friend = getUser(friend)
+
+		# create dbObject of friendship relation
+		dbObj = models.Friendship(user=user, friend=friend)
+
+		# save object in database
+		dbObj.save()
+
+	return True
+# def addFriend()
+
+
+def blockUser(user, blocked, reason):
+	"""
+	This method implements the blocking between two users.
+
+	@params user, blocked: Primary keys of User table.
+	@type user, login: string
+
+	@rtype: boolean
+	@return: True, if success, false, if not.
+	"""
+	# check relationship
+	rel = getRelationship(user, blocked)
+
+	print rel
+
+	# user was friends: remove it
+	if rel == "FRI":
+
+		# get the object and remove it from database
+		dbObj = models.Friendship.objects.filter(user__login=user, 
+			                                  friend__login=blocked)
+		
+		dbObj[0].delete()
+
+	if rel != "ENE":
+		
+		#get user
+		user = getUser(user)
+
+		#get friend
+		enemy = getUser(blocked)
+
+		# insert the relation of blocking
+		dbObj = models.Blocking(blocker=user, blocked=enemy)
+
+		# save object in database
+		dbObj.save()
+
+		# get reason
+		if reason == 'S':
+			reason = 'Spammer'
+		elif reason == 'A':
+			reason = 'Abusive Content'
+		elif reason == 'P':
+			reason = 'Personal Reasons'
+
+		# insert reason in database
+		dbObj2 = models.BlockingReason(blocking=dbObj, reason=reason)
+
+		# save object in database
+		dbObj2.save()
+
+	return True	
+# def blockUser()
+
+
 def checkAllreadyUser(login):
 	"""
 	This method check if the user identified by login is allready
@@ -56,11 +152,10 @@ def createUser(data):
 	@returns: Create was sucessful, return True, else, False
 	"""
 
-	print data
-
 	# name was sent, use it
 	if 'name' in data and data['name']:
 		name = data['name']
+		firstName = data["name"].split(" ")
 	
 	# city was sent, use it
 	if 'city' in data and data['city']:
@@ -75,24 +170,30 @@ def createUser(data):
 		return False
 
 	# create object
-	#dbObj = models.User(name=name, login=login, city=city)
+	dbObj = models.User(name=name, login=login, city=city, firstName=firstName[0])
 
 	# save object in db
-	#dbObj.save()
+	dbObj.save()
 
 	# save image
 	size = 128, 128
 	img = ""	
-	if 'image' in data and data['image']:	
+	
+	if 'userImage' in data and data['userImage']:
+
 		try:
-			img = Image.open(data['image'])
+			img = data['userImage']
+			imgFile = open(IMAGE_URL+login+"_img", "w")
+			imgFile.write(img.read())
+			imgFile.close() 
+			img = Image.open(IMAGE_URL+login+"_img")
 		except:
 			img = Image.open(IMAGE_URL+"generic.png")
 	else:
 		img = Image.open(IMAGE_URL+"generic.png")
-
-	#img.thumbnail(size, Image.ANTIALIAS)
-    #img.save(IMAGE_URL+login+"_img", "png")
+	
+	img.thumbnail(size, Image.ANTIALIAS)
+	img.save(IMAGE_URL+login+"_img", "png")
 
 	# return True
 	return True
@@ -276,6 +377,45 @@ def getMusicalActSugestionMatrix():
 # def getMusicalActSugestionMatrix()
 
 
+def getRelationship(requester, user):
+	"""
+	This method checks if requester and user are friends, enemies or just
+	don't have any relationship.
+
+	@param requester, user: Primary keys of User tables
+	@type requester, user: string
+
+	@rype: string
+	@retuns: the tags FRI (friends), ENE (enemies), NOT (nothing)
+	"""
+	# not enemies nor friends: return NOT
+	response = "NOT"
+
+	# get friends of requester
+	friends = getUserFriends(requester)
+
+	# check if user is friend
+	for friend in friends:
+
+		if friend.friend.login == user:
+
+			response = "FRI"
+
+	# get enemies of requester
+	enemies = getUserEnemies(requester)
+
+	# check if user is enemy
+	for enemy in enemies:
+
+		if enemy.blocked.login == user:
+
+			response = "ENE"
+
+	# return relationship
+	return response
+# def getRelationship()
+	
+
 def getSimilarity(vec1, vec2):
 	"""
 	This method calculates the cosine similarity between two vectors.
@@ -324,10 +464,15 @@ def getUser(login):
 	@returns: The object from User's table
 	"""
 	#get user
-	user = models.User(login=login)
+	user = models.User.objects.filter(login=login)
 
-	#return user
-	return user
+	#user exists: return it
+	if user:
+		return user[0]
+
+	# user doesn't exists: return nothing
+	else:
+		return None
 # def getUser()
 
 
@@ -410,7 +555,7 @@ def getUserFriendsSugestion(login, cache):
 
 	# build the list of user's enemies to not include them in recomendation
 	for enemy in myEnemies:
-		listEnemiesLogin.append(enemy.bloqueado.login)
+		listEnemiesLogin.append(enemy.blocked.login)
 
 	# get all users
 	everybody = getEverybody()
@@ -453,6 +598,59 @@ def getUserFriendsSugestion(login, cache):
 # def getUserFriendsSugestion()
 
 
+def getUserMessage(login):
+	"""
+	This method generates messages to show in user's home view  based
+	on it's behavior in Music Lounge.
+
+	@param login: Primary key of user's table
+	@type login: string
+
+	@rtype: Dictionary
+	@returns: A Dictionary containing the message and it's type.
+	"""
+	# try to get blocking reasons:
+	blockings = models.BlockingReason.objects.filter(blocking__blocked__login=login)
+
+	# instantiate the reason list
+	reasonList = []
+
+	# there is blockings: store it's reasons
+	if blockings:
+		for blocking in blockings:
+			reasonList.append(blocking.reason)
+
+	# get the count of reasons
+	s = 0
+	a = 0
+	p = 0
+	print reasonList
+	if reasonList:
+		s = reasonList.count("Spammer")
+		a = reasonList.count("Abusive Content")
+		p = reasonList.count("Personal Reasons")
+
+	message = {}
+
+	# select the message based on blocking reasons or ramdomic choose one
+	if (s>=5) and (s>a) and (s>p):
+		message["text"] = "Take care with sending spams!!! Many people may not be pleased with that !"
+		message["type"] = "warning"
+	elif (a>=5) and (a>s) and (a>p):
+		message["text"] = "Take care with what you post here !!! Be respectful with your Music Lounge Mates!"
+		message["type"] = "warning"
+	elif (p>=5) and (p>a) and (p>s):		
+		message["text"] = "Be nice with your Music Lounge Mates!!! They're here to enjoy too !"
+		message["type"] = "warning"
+	else:
+		index = randint(0, len(MESSAGES)-1)
+		message["text"] = MESSAGES[index]
+		message["type"] = "cool"
+
+	# return the message dicts
+	return message
+
+
 def getUserMusicalActs(login):
 	"""
 	This method gets the musical acts chosen by the user identified by login.
@@ -469,4 +667,97 @@ def getUserMusicalActs(login):
 	# return musicalActs
 	return musicalActs
 # def getUserMusicalActs()
+
+
+def updateUser(data):
+	"""
+	This method update a user in database.
+
+	@param data: Data to update user in database
+	@type data: Dictionary
+
+	@rtype: boolean
+	@returns: Update was sucessful, return True, else, False
+	"""
+
+	# name was sent, use it
+	if 'name' in data and data['name']:
+		name = data['name']
+		firstName = data["name"].split(" ")
 	
+	# city was sent, use it
+	if 'city' in data and data['city']:
+		city = data['city']
+	
+	# login was sent, use it
+	if 'login' in data and data['login']:
+		login = data['login']
+	
+	# login wasn't sent: return False
+	else:
+		return False
+
+	# create object
+	dbObj = models.User.objects.get(login=login)
+	dbObj.name = name
+	dbObj.firstName = firstName[0]
+	dbObj.city = city
+
+	# save object in db
+	dbObj.save()
+
+	# save image
+	size = 128, 128
+	img = ""	
+	
+	if 'userImage' in data and data['userImage']:
+		try:
+			img = data['userImage']
+			imgFile = open(IMAGE_URL+login+"_img", "w")
+			imgFile.write(img.read())
+			imgFile.close() 
+			img = Image.open(IMAGE_URL+login+"_img")
+		except:
+			img = Image.open(IMAGE_URL+"generic.png")
+	else:
+		img = Image.open(IMAGE_URL+"generic.png")
+	
+	img.thumbnail(size, Image.ANTIALIAS)
+	img.save(IMAGE_URL+login+"_img", "png")
+
+	# return True
+	return True
+# def updateUser()
+	
+
+def unblockUser(user, blocked):
+	"""
+	This method implements the unblocking between two users.
+
+	@params user, blocked: Primary keys of User table.
+	@type user, login: string
+
+	@rtype: boolean
+	@return: True, if success, false, if not.
+	"""
+	# check relationship
+	rel = getRelationship(user, blocked)
+
+	# if they're enemies: delete this relation
+	if rel == "ENE":
+		
+		# get the relation of blocking
+		dbObj = models.Blocking.objects.get(blocker=user, blocked=blocked)
+
+		# get the blocking
+		blocking = models.Blocking.objects.filter(blocker=user, blocked=blocked)
+
+		# get the reason of blocking
+		dbObj2 = models.BlockingReason.objects.get(blocking=blocking)
+		
+		# delete objects in database
+		dbObj.delete()
+		dbObj2.delete()
+
+	return True	
+# def unblockUser()

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block content %}
+	
+	<ol class="breadcrumb">
+		<li><a href="{% url 'musiclounge:logout' %}">Logout</a></li>
+		<li><a href="{% url 'musiclounge:home' requester %}">Home</a></li>
+		<li class="active">{{ user.name }}' Profile</li>
+	</ol>
+	
+	<!-- TABS -->
+	<div class="container">
+		<div id="content">
+			<ul id="tabs" class="nav nav-tabs nav-justified" data-tabs="tabs">
+				<li class="active" ><a href="#profile" data-toggle="tab"><b>{{ user.name }}</b></a></li>
+				<li><a href="#friends" data-toggle="tab"><b>Friends</b></a></li>
+				<li><a href="#music" data-toggle="tab"><b>Musical Acts</b></a></li>
+				<li><a href="#statistics" data-toggle="tab"><b>Statistics</b></a></li>
+			</ul>
+
+			<div id="my-tab-content" class="tab-content">
+				
+				<!-- PROFILE -->
+
+				<div class="tab-pane active" id="profile">
+					<div class="tab-pane" id="profile">
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<div class="container">
+									<div id="content" align="left">
+										<form class="form-horizontal" role="form">
+										  	
+										  <div class="form-group">
+										    <div class="col-sm-10">
+										      <img class="img-circle" src="{{ STATIC_URL }}images/{{ user.login }}_img"/>
+										    </div>
+										  </div>
+
+										  <div class="form-group">
+										    <label class="col-sm-1 control-label">Name: </label>
+										    <div class="col-sm-10">
+										      {{ form.name }}
+										    </div>
+										  </div>
+										  
+										  <div class="form-group">
+										    <label class="col-sm-1 control-label">Login: </label>
+										    <div class="col-sm-10">
+										      {{ form.login }}
+										    </div>
+										  </div>
+
+										  <div class="form-group">
+										    <label class="col-sm-1 control-label">City: </label>
+										    <div class="col-sm-10">
+										      {{ form.city }}
+										    </div>
+										  </div>
+										</form>
+									</div>
+								</div>
+								<br>
+								{% if relationship == 'FRI' %}
+									<div class="alert alert-success alert-dismissable">
+									  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									  <strong>Hey!</strong> You and {{ user.name }} are friends!
+									</div>
+									<form class="form-inline" role="form" action="{% url 'musiclounge:managerRelationship' user.login %}" method="post">
+										{% csrf_token %}
+										<div class="form-group">
+											<div class="col-sm-10">
+												<input type="submit" class="btn btn-danger" value="Block User" name="button"></input>
+											</div>
+										</div>
+										<div class="form-group">
+										    <div class="col-sm-10">
+										      <select class="form-control" id="reasons" name="reason">
+										        <option value="S" selected="selected" name="reason">Spammer</option>
+										        <option value="A" name="reason">Abusive Content</option>
+										        <option value="P" name="reason">Personal Reasons</option>
+										      </select>
+										    </div>
+									  	</div>	
+									</form>
+
+								{% elif relationship == 'ENE' %}
+									
+									<div class="alert alert-warning alert-dismissable">
+									  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									  <strong>Warning!</strong> You blocked this user! 
+									</div>
+									<form class="form-inline" role="form" action="{% url 'musiclounge:managerRelationship' user.login %}" method="post">
+									{% csrf_token %}		
+										<div class="form-group">
+											<div class="col-sm-10">
+												<input type="submit" class="btn btn-warning" value="Unblock User" name="button"></input>
+											</div>
+										</div>
+									</form>
+
+								{% else %}
+									<form class="form-inline" role="form" action="{% url 'musiclounge:managerRelationship' user.login %}" method="post">
+										{% csrf_token %}		
+										<div class="form-group">
+											<div class="col-sm-10">
+												<input type="submit" class="btn btn-success" value="Add User" name="button"></input>
+											</div>
+										</div>
+										<div class="form-group">
+											<div class="col-sm-10">
+												<input type="submit" class="btn btn-danger" value="Block User" name="button"></input>
+											</div>
+										</div>
+										<div class="form-group">
+										    <div class="col-sm-10">
+										      <select class="form-control" id="reasons" name="reason">
+										        <option value="S" selected="selected" name="reason">Spammer</option>
+										        <option value="A" name="reason">Abusive Content</option>
+										        <option value="P" name="reason">Personal Reasons</option>
+										      </select>
+										    </div>
+									  	</div>	
+									</form>
+								{% endif %}
+
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- FRIENDS -->
+				
+					<div class="tab-pane" id="friends">
+						<div class="panel panel-default">
+							<div class="panel-body">
+								<div class="container">
+							   		<ul class="row">
+							   			{% if friends %}
+							   				{% for friend in friends %}
+										       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+										       			<p><a href='{% url 'musiclounge:user' friend.friend.login %}'><img class="img-circle" id="usr_{{ friend.friend.login }}" src="{{ STATIC_URL }}images/{{ friend.friend.login }}_img"/></a></p>
+										       			<p><a href='{% url 'musiclounge:user' friend.friend.login %}'><b>{{ friend.friend.firstName }}</b></a></p>
+										       	</li>
+									    	{% endfor %}
+									    {% else %}
+									    	<div class="alert alert-warning alert-dismissable">
+									    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									    	  <strong>Sorry!</strong> {{ user.name }} doesn't have any friends! :(
+									    	</div>
+									    {% endif %}
+									   </ul>
+								</div>		
+							</div>
+						</div>
+					</div>
+				
+
+				
+				<!-- MUSICAL ACTS -->
+
+				<div class="tab-pane" id="music">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="container">
+						   		<ul class="row">
+						   			{% if musicalActs %}
+						   				{% for act in musicalActs %}
+									       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+									       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><img class="img" id="mus_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></a?</p>
+									       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><b>{{ act.musicalAct.title }}</b></a></p>
+									       		
+									       	</li>
+								    	{% endfor %}
+								    {% else %}
+								    	<div class="alert alert-warning alert-dismissable">
+								    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								    	  <strong>Sorry!</strong> {{ user.name }} doesn't like any musical acts! :(
+								    	</div>
+								    {% endif %}
+							   </ul>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- STATISTICS -->
+				<div class="tab-pane" id="statistics">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							{% if statistics %}
+								STATISTICS
+							{% else %}
+								<div class="alert alert-warning alert-dismissable">
+								  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								  <strong>Sorry!</strong> {{ user.name }} doesn't have any statistics! :(
+								</div>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div> 
+	<script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.js"></script>
+	<script type="text/javascript">
+
+		// js to improve the tabs behavior
+		jQuery(document).ready(function ($){
+
+
+			$('#tabs').tab();
+
+		});
+	</script>
+{% endblock %}

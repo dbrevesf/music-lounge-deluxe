@@ -1,40 +1,90 @@
 {% extends "base.html" %}
 {% block content %}
+
 	<ol class="breadcrumb">
-		<li><a href="{% url 'musiclounge:index' %}">Index</a></li>
+		<li><a href="{% url 'musiclounge:logout' %}">Logout</a></li>
 		<li class="active">Home</li>
 	</ol>
-	<!-- LIGHTBOX -->
-	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-		      	</div>  
-				<div class="modal-body">  
-				</div>
-				<div class="modal-footer">
-				</div>	
-			</div>
-		</div>
-	</div>
-
+	
 	<!-- TABS -->
 	<div class="container">
 		<div id="content">
 			<ul id="tabs" class="nav nav-tabs nav-justified" data-tabs="tabs">
-				<li class="active" ><a href="#home" data-toggle="tab">home</a></li>
-				<li><a href="#friends" data-toggle="tab">friends</a></li>
-				<li><a href="#friendSugestion" data-toggle="tab">friends sugestion</a></li>
-				<li><a href="#music" data-toggle="tab">music</a></li>
-				<li><a href="#musicSugestion" data-toggle="tab">music sugestion</a></li>
+				<li class="active" ><a href="#home" data-toggle="tab"><b>Home</b></a></li>
+				<li><a href="#friends" data-toggle="tab"><b>Friends</b></a></li>
+				<li><a href="#friendSugestion" data-toggle="tab"><b>Friends Sugestion</b></a></li>
+				<li><a href="#music" data-toggle="tab"><b>Music</b></a></li>
+				<li><a href="#musicSugestion" data-toggle="tab"><b>Music Sugestion</b></a></li>
+				<li><a href="#musicSugestion" data-toggle="tab"><b>My Statistics</b></a></li>
 			</ul>
 
 			<div id="my-tab-content" class="tab-content">
 				
+				<!-- HOME -->
+
 				<div class="tab-pane active" id="home">
 					<div class="tab-pane" id="home">
 						<div class="panel panel-default">
 							<div class="panel-body">
+
+								{% if message %}								
+									{% if message.type == 'warning' %}
+										<div class="alert alert-danger alert-dismissable">
+										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										<strong>Message from Music Lounge: </strong> {{ message.text }}
+										</div>
+									{% else %}
+										<div class="alert alert-success alert-dismissable">
+										<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+										<strong>Message from Music Lounge: </strong>{{ message.text}}
+										</div>
+									{% endif %}
+								
+								{% endif %}
+
+
+								<div class="container">
+									<div id="content" align="left">
+										<form enctype="multipart/form-data" class="form-horizontal" role="form" action="{% url 'musiclounge:updateUser' %}" method="post">
+										{% csrf_token %}
+											<div class="form-group">
+												<div class="col-sm-10">
+													<img class="img-circle" src="{{ STATIC_URL }}images/{{ user.login }}_img"/>
+												</div>
+											</div>
+
+											<div class="form-group">
+												<label class="col-sm-1 control-label">Name: </label>
+												<div class="col-sm-10">
+													{{ userForm.name }}
+												</div>
+											</div>
+
+											<div class="form-group">
+												<label class="col-sm-1 control-label">Login: </label>
+												<div class="col-sm-10">
+													{{ userForm.login }}
+												</div>
+											</div>
+
+											<div class="form-group">
+												<label class="col-sm-1 control-label">City: </label>
+												<div class="col-sm-10">
+													{{ userForm.city }}
+												</div>
+											</div>
+				
+											<div class="form-group">
+												<label for="userImg">Profile Image: </label>
+												<input id="id_image" type="file" class="" name="image">
+											</div>	
+											
+											<div class="form-group">
+												<input type="submit" class="btn btn-success" value="Update"></input>
+											</div>
+										</form>
+									</div>
+								</div>
 
 							</div>
 						</div>
@@ -52,15 +102,13 @@
 							   				{% for friend in friends %}
 							   					{% if admin %}
 										       		<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-										       				<p><img class="img-circle" id="usr_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></p>
-										       				<p><b>{{ friend.firstName }}</b></p>
-										       			</a>
+										       				<p><a href='{% url 'musiclounge:user' friend.login %}'><img class="img-circle" id="usr_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></a></p>
+										       				<p><a href='{% url 'musiclounge:user' friend.login %}'><b>{{ friend.firstName }}</b></a></p>
 										       		</li>
 										       	{% else %}
 											       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-											       			<p><img class="img-circle" id="usr_{{ friend.friend.login }}" src="{{ STATIC_URL }}images/{{ friend.friend.login }}_img"/></p>
-											       			<p><b>{{ friend.friend.firstName }}</b></p>
-											       		</a>
+											       			<p><a href='{% url 'musiclounge:user' friend.friend.login %}'><img class="img-circle" id="usr_{{ friend.friend.login }}" src="{{ STATIC_URL }}images/{{ friend.friend.login }}_img"/></a></p>
+											       			<p><a href='{% url 'musiclounge:user' friend.friend.login %}'><b>{{ friend.friend.firstName }}</b></a></p>
 											       	</li>
 									    		{% endif %}
 									    	{% endfor %}
@@ -83,9 +131,8 @@
 						   			{% if friendSugestion %}
 						   				{% for friend in friendSugestion %}
 									       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-									       			<p><img class="img-circle" id="uss_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></p>
-									       			<p><b>{{ friend.firstName }}</b></p>
-									       		</a>
+									       			<p><a href='{% url 'musiclounge:user' friend.login %}'><img class="img-circle" id="uss_{{ friend.login }}" src="{{ STATIC_URL }}images/{{ friend.login }}_img"/></a></p>
+									       			<p><a href='{% url 'musiclounge:user' friend.login %}'><b>{{ friend.firstName }}</b></a></p>
 									       	</li>
 								    	{% endfor %}
 								    {% else %}
@@ -108,15 +155,15 @@
 						   				{% for act in musicalActs %}
 						   					{% if admin %}
 									       		<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-									       				<p><img class="img" id="mus_{{ act.id }}" src="{{ STATIC_URL }}images/{{ act.id }}_img"/></p>
+									       				<p><a href='{% url 'musiclounge:musicalAct' act.id %}'><img class="img" id="mus_{{ act.id }}" src="{{ STATIC_URL }}images/{{ act.id }}_img"/></a></p>
 									       				<p><b>{{ act.title }}</b></p>
 									       			</a>
 									       		</li>
 									       	{% else %}
 										       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-										       			<p><img class="img" id="mus_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></p>
-										       			<p><b>{{ act.musicalAct.title }}</b></p>
-										       		</a>
+										       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><img class="img" id="mus_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></a?</p>
+										       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><b>{{ act.musicalAct.title }}</b></a></p>
+										       		
 										       	</li>
 								    		{% endif %}
 								    	{% endfor %}
@@ -138,9 +185,9 @@
 						   			{% if musicalActSugestion %}
 						   				{% for act in musicalActSugestion %}
 									       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
-								       			<p><img class="img" id="mss_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></p>
-								       			<p><b>{{ act.musicalAct.title }}</b></p>
-									       		</a>
+								       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><img class="img" id="mss_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></a></p>
+								       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><b>{{ act.musicalAct.title }}</b></a></p>
+			
 									       	</li>
 								    	{% endfor %}
 								    {% else %}
@@ -160,55 +207,7 @@
 
 		// js to improve the tabs behavior
 		jQuery(document).ready(function ($){
-
-
 			$('#tabs').tab();
-
-			$('li img').on('click',function(){       
-       			
-                var src = $(this).attr('src');
-                var id = $(this).attr('id');
-                var label = id.substring(0,4);
-
-                var img = '<img src="' + src + '" class="img-responsive"/>';
-                var header = '<h4 class="modal-title">' + id + '</h4>';
-                var closeButton = '<button class="close" data-dismiss="modal" aria-hidden="true">&times;</button>';
-    			if (label == "usr_"){
-	                var footerButton = '<button class="btn btn-danger" id="blockuser">Block</button>';
-	            }
-	            else if (label == "uss_") {
-	                var blockButton = '<button class="btn btn-danger" id="blockuser">Block</button>';
-	                var addButton = '<button class="btn btn-success" id="adduser">Add user</button>';
-	                var footerButton = blockButton+addButton;
-	            }
-	            else if (label == "mss_") {
-	                var footerButton = '<button class="btn btn-success" id="likeAct">Like</button>';
-	            }
-	            else{
-	            	var footerButton = '';
-	            }
-
-	            $('#myModal').modal();
-	            $('#myModal').on('shown.bs.modal', function(){
-	                $('#myModal .modal-body').html(img);
-	                $('#myModal .modal-header').html(closeButton+header);
-	                $('#myModal .modal-footer').html(footerButton);
-	            });
-	            $('#myModal').on('hidden.bs.modal', function(){
-	                $('#myModal .modal-body').html('');
-	            });
-           	});
-			$('#startcall').live("click",function(){
-       			postData = {}
-       			postData['origin'] = "8826"
-       			postData['destination'] = "8824"
-       			$.ajax({
-					type: "POST",
-					url: "http://localhost:5000/converja/api/calls",
-					data: JSON.stringify(postData),
-					dataType: 'json',
-				});
-			});	
 		});
 	</script>
 {% endblock %}

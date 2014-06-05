@@ -268,8 +268,6 @@ def main():
     #sync database with django
     management.call_command('syncdb', interactive=False)
 
-
-
     #populate user table
     populateUserTable()
 

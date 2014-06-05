@@ -1701,7 +1701,7 @@ output {
 }
 .form-control {
   display: block;
-  width: 30%;
+  width: 60%;
   height: 34px;
   padding: 6px 12px;
   font-size: 14px;
@@ -4437,6 +4437,7 @@ a.thumbnail.active {
 }
 .alert {
   padding: 15px;
+  width: 94%; 
   margin-bottom: 20px;
   border: 1px solid transparent;
   border-radius: 4px;

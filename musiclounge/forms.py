@@ -7,44 +7,52 @@ from musiclounge import models
 
 class User(dforms.Form):
 	name =  dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
-		                                                   'placeholder': 'Enter your name'}))
+		                                                   'placeholder': 'Enter your name'}), label='Name: ')
 	login = dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
-		                                                   'placeholder': 'Enter your login'}))
+		                                                   'placeholder': 'Enter your login'}), label='Login: ')
 	city = dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
-		                                                   'placeholder': 'Enter your city'}))
+		                                                   'placeholder': 'Enter your city'}), required=False, label='City: ')
 	userImage = dforms.ImageField(required=False)
 
 
 class Login(dforms.Form):
 	login = dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
-		                                                   'placeholder': 'Enter your Login'}))
+		                                                   'placeholder': 'Enter your Login'}), label='Login: ')
 
 
 class MusicalAct(dforms.Form): 
-	title =  dforms.CharField(max_length=255)
-	uri =  dforms.CharField(max_length=255)
-	country =  dforms.CharField(max_length=255)
-	genre =  dforms.CharField(max_length=255)
+	title =  dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
+		                                                   'placeholder': 'Enter the title'}), label='Name: ')
+	uri =  dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
+		                                                   'placeholder': 'Enter the URI'}), label='URI: ')
+	country =  dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
+		                                                   'placeholder': 'Enter the country'}), label='Country: ')
+	genre =  dforms.CharField(widget=dforms.TextInput(attrs={'class' : 'form-control',
+		                                                   'placeholder': 'Enter the genre'}), label='Genre: ')
+	summary = dforms.CharField(widget=dforms.Textarea(attrs={'class' : 'form-control',
+		                                                     'placeholder': 'Enter the summary',
+		                                                     'rows': 10,
+                              								 'cols': 160}), label='Summary: ')
 
 
 class Musician(dforms.Form):
-	name = dforms.CharField(max_length=255)
-	genre = dforms.CharField(max_length=255)
-	birthdate = dforms.DateField()
-	musicalAct = dforms.ModelMultipleChoiceField(queryset=models.MusicalAct.objects.all())
+	name = dforms.CharField(max_length=255, label='Name: ')
+	genre = dforms.CharField(max_length=255, label='Genre: ')
+	birthdate = dforms.DateField(label='Birth Date: ')
+	musicalAct = dforms.ModelMultipleChoiceField(label='Musical Acts: ', queryset=models.MusicalAct.objects.all())
 
 
 class Blocking(dforms.Form):	
-	blocked = dforms.ModelMultipleChoiceField(queryset=models.User.objects.all())
+	blocked = dforms.ModelMultipleChoiceField(queryset=models.User.objects.all(), label='Users: ')
 	
 
 class Friendship(dforms.Form):
-	friend = dforms.ModelMultipleChoiceField(queryset=models.User.objects.all())
+	friend = dforms.ModelMultipleChoiceField(queryset=models.User.objects.all(), label='Users: ')
 
 
 class MusicalActRate(dforms.Form):
-	atomusical = dforms.ModelMultipleChoiceField(queryset=models.MusicalAct.objects.all())
-	nota = dforms.IntegerField()
+	atomusical = dforms.ModelMultipleChoiceField(queryset=models.MusicalAct.objects.all(), label='Musical Acts: ')
+	nota = dforms.IntegerField(label='Rate: ')
 
 
 class BlockingReason(dforms.Form):
