@@ -188,11 +188,17 @@
 					<div class="panel panel-default">
 						<div class="panel-body">
 							{% if statistics %}
-								STATISTICS
+								{% for statistic in statistics %}
+									<ul class="list-group">
+										{% if statistic.free %}
+											<li class="list-group-item"><b>{{ statistic.label }}</b> : {{ statistic.value }}</li>
+										{% endif %}
+									</ul>
+								{% endfor %}
 							{% else %}
 								<div class="alert alert-warning alert-dismissable">
 								  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-								  <strong>Sorry!</strong> {{ user.name }} doesn't have any statistics! :(
+								  <strong>Sorry!</strong> there is no statistics for you! :(
 								</div>
 							{% endif %}
 						</div>

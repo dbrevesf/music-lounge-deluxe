@@ -78,9 +78,38 @@
 											<input type="submit" class="btn btn-success" value="Update"></input>
 
 										{% endif%}
-
-
 									</form>
+									{% if requesterLikesThis %}
+										<form class="form-inline" role="form" action="{% url 'musiclounge:managerMusicalActLikes' musicalAct.id %}" method="post">
+											{% csrf_token %}
+											<div class="form-group">
+												<div class="col-sm-10">
+													<input type="submit" class="btn btn-danger" value="Dislike Musical Act" name="button"></input>
+												</div>
+											</div>
+										</form>
+									{% else %}
+										<form class="form-inline" role="form" action="{% url 'musiclounge:managerMusicalActLikes' musicalAct.id %}" method="post">
+											{% csrf_token %}
+											<div class="form-group">
+												<div class="col-sm-10">
+													<input type="submit" class="btn btn-success" value="Like Musical Act" name="button"></input>
+												</div>
+											</div>
+											<div class="form-group">
+											    <div class="col-sm-10">
+											      <select class="form-control" id="rate" name="rate">
+											        <option value="1" selected="selected" name="rate">1</option>
+											        <option value="2" name="rate">2</option>
+											        <option value="3" name="rate">3</option>
+											        <option value="4" name="rate">4</option>
+											        <option value="5" name="rate">5</option>
+
+											      </select>
+											    </div>
+										  	</div>	
+										</form>
+									{% endif %}
 								</div>
 
 							</div>
@@ -93,7 +122,24 @@
 					<div class="tab-pane" id="similarMusicalActs">
 						<div class="panel panel-default">
 							<div class="panel-body">
-									
+								<div class="container">
+							   		<ul class="row">
+							   			{% if similarMusicalActs %}
+							   				{% for act in similarMusicalActs %}
+										       	<li class="col-lg-2 col-md-2 col-sm-3 col-xs-4">
+										       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><img class="img" id="mus_{{ act.musicalAct.id }}" src="{{ STATIC_URL }}images/{{ act.musicalAct.id }}_img"/></a?</p>
+										       			<p><a href='{% url 'musiclounge:musicalAct' act.musicalAct.id %}'><b>{{ act.musicalAct.title }}</b></a></p>
+										       		
+										       	</li>
+									    	{% endfor %}
+									    {% else %}
+									    	<div class="alert alert-warning alert-dismissable">
+									    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									    	  <strong>Sorry!</strong> you didn't like any musical act! :(
+									    	</div>
+									    {% endif %}
+								   </ul>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -105,6 +151,18 @@
 				<div class="tab-pane" id="statistics">
 					<div class="panel panel-default">
 						<div class="panel-body">
+							{% if statistics %}
+								{% for statistic in statistics %}
+									<ul class="list-group">
+										<li class="list-group-item"><b>{{ statistic.label }}</b> : {{ statistic.value }}</li>	
+									</ul>
+								{% endfor %}
+							{% else %}
+								<div class="alert alert-warning alert-dismissable">
+								  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								  <strong>Sorry!</strong> there is no statistics for you! :(
+								</div>
+							{% endif %}
 						</div>
 					</div>
 				</div>

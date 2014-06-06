@@ -254,6 +254,39 @@ def recreateDb():
     print("Done")
 
 
+def setEnviroment():
+    """
+    This method set the enviroment in music lounge. It's basically populate
+    those relations' table like blocking, friendship, etc.
+    """    
+    # get users
+    users = models.User.objects.all()
+    users = users[30:]
+    user1 = models.User.objects.get(login="danielferreira")
+    user2 = models.User.objects.get(login="erikaalbizzati")
+    user3 = models.User.objects.get(login="fabiolira")
+
+    print "+ The blocking rain will begin... "
+    for user in users:
+        block = models.Blocking(blocker=user, blocked=user1)
+        block.save()
+        reason = models.BlockingReason(blocking=block, reason="Spammer")
+        reason.save()
+        print "+ " + user.name + " blocked " + user1.name + ". Reason: Spammer"
+        
+        block = models.Blocking(blocker=user, blocked=user2)
+        block.save()
+        reason = models.BlockingReason(blocking=block, reason="Abusive Content")
+        reason.save()
+        print "+ " + user.name + " blocked " + user2.name + ". Reason: Abusive Content"
+        
+        block = models.Blocking(blocker=user, blocked=user3)
+        block.save()
+        reason = models.BlockingReason(blocking=block, reason="Personal Reasons")
+        reason.save()
+        print "+ " + user.name + " blocked " + user3.name + ". Reason: Personal Reasons"
+
+
 
 def main():
     """
@@ -276,6 +309,9 @@ def main():
 
     #populate music acts and rating tables
     populateMusicTables()
+
+    # set Enviroment
+    setEnviroment()
 
 
 # call the main

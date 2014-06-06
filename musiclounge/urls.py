@@ -15,4 +15,5 @@ urlpatterns = patterns('',
     url(r'^user/(?P<login>\w+)', views.user, name='user'),
     url(r'^updateUser', views.updateUser, name='updateUser'),
     url(r'^managerRelationship/(?P<user>\w+)', views.managerRelationship, name='managerRelationship'),
+    url(r'^managerMusicalActLikes/(?P<musicalActId>\w+)', views.managerMusicalActLikes, name='managerMusicalActLikes'),
 )

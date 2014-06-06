@@ -15,7 +15,7 @@
 				<li><a href="#friendSugestion" data-toggle="tab"><b>Friends Sugestion</b></a></li>
 				<li><a href="#music" data-toggle="tab"><b>Music</b></a></li>
 				<li><a href="#musicSugestion" data-toggle="tab"><b>Music Sugestion</b></a></li>
-				<li><a href="#musicSugestion" data-toggle="tab"><b>My Statistics</b></a></li>
+				<li><a href="#statistics" data-toggle="tab"><b>My Statistics</b></a></li>
 			</ul>
 
 			<div id="my-tab-content" class="tab-content">
@@ -113,7 +113,10 @@
 									    		{% endif %}
 									    	{% endfor %}
 									    {% else %}
-									    	You don't have any friends :(
+									    	<div class="alert alert-warning alert-dismissable">
+									    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									    	  <strong>Sorry!</strong> you don't have any friends! :(
+									    	</div>
 									    {% endif %}
 									   </ul>
 								</div>		
@@ -136,7 +139,10 @@
 									       	</li>
 								    	{% endfor %}
 								    {% else %}
-								    	No sugestion of friends for you :(
+								    	<div class="alert alert-warning alert-dismissable">
+								    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								    	  <strong>Sorry!</strong> there is no friend's sugestion for you :(
+								    	</div>
 								    {% endif %}
 								   </ul>
 							</div>		
@@ -168,7 +174,10 @@
 								    		{% endif %}
 								    	{% endfor %}
 								    {% else %}
-								    	You don't likes any musical acts :(
+								    	<div class="alert alert-warning alert-dismissable">
+								    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								    	  <strong>Sorry!</strong> you didn't like any musical act! :(
+								    	</div>
 								    {% endif %}
 							   </ul>
 							</div>
@@ -191,10 +200,43 @@
 									       	</li>
 								    	{% endfor %}
 								    {% else %}
-								    	No sugestion of musical act for you :(
+								    	<div class="alert alert-warning alert-dismissable">
+								    	  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+								    	  <strong>Sorry!</strong> there is no music sugestion for you! :(
+								    	</div>
 								    {% endif %}
 							   </ul>
 							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- STATISTICS -->
+				<div class="tab-pane" id="statistics">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							
+								
+								{% if statistics %}
+									{% for statistic in statistics %}
+										<ul class="list-group">
+											{% if statistic.id == 'my' %}
+												<li class="list-group-item"><b>My Reasons: {{ statistic.label }}</b> : {{ statistic.value }}</li>
+											{% elif statistic.id == 'their' %}
+												<li class="list-group-item"><b>Their Reasons: {{ statistic.label }}</b> : {{ statistic.value }}</li>
+											{% else %}
+												<li class="list-group-item"><b>{{ statistic.label }}</b> : {{ statistic.value }}</li>
+											{% endif %}
+										</ul>
+									{% endfor %}
+								{% else %}
+									<div class="alert alert-warning alert-dismissable">
+									  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+									  <strong>Sorry!</strong> there is no statistics for you! :(
+									</div>
+								{% endif %}
+								
+							
 						</div>
 					</div>
 				</div>

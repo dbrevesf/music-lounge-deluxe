@@ -4,6 +4,7 @@
 #
 # IMPORTS
 #
+from math import sqrt
 from musiclounge import models
 from random import randint
 from unicodedata import normalize
@@ -26,6 +27,7 @@ MESSAGES = ["The real trouble with reality is that there's no background music."
             "Borrow money from pessimists - they don't expect it back. ",
             "A conscience is what hurts when all your other parts feel so good. ",
             "Don't drink and drive you might spill your beer"]
+
 
 #
 # CODE
@@ -73,8 +75,6 @@ def blockUser(user, blocked, reason):
 	"""
 	# check relationship
 	rel = getRelationship(user, blocked)
-
-	print rel
 
 	# user was friends: remove it
 	if rel == "FRI":
@@ -200,6 +200,30 @@ def createUser(data):
 # def creatUser()
 
 
+def dislikeMusicalAct(requester, musicalActId):
+	"""
+	This method remove the like information from database
+
+	@param requester: primary key of user's table to requester
+	@type requester: string
+
+	@param musicalActId: Primary key of musical act's table
+	@type musicalActId: string
+
+	@rtype: boolean
+	@returns: True
+	"""
+	# get the object from table
+	dbObj = models.MusicalActRate.objects.get(musicalAct__id=musicalActId, user__login=requester)
+
+	# delete object from database
+	dbObj.delete()
+
+	# return true
+	return True
+# def diskeMusicalAct()
+
+
 def getEverybody():
 	"""
 	This method gets all the users registered in database.
@@ -263,6 +287,61 @@ def getMusicalAct(id):
 # def getMusicalAct():
 
 
+def getMusicalActStatistics(id, matrix):
+	"""
+	This method get the statistics from an specific musical act represented
+	by id.
+
+	@param id: Primary key from musical act table
+	@type id: string
+
+	@rtype: dictionary
+	@returns: A dictionary containing the statistics
+	"""	
+	# initialize list
+	statistics = []
+
+	# get all the likes
+	likes = models.MusicalActRate.objects.filter(musicalAct__id=id)
+	
+	# get number of likes
+	numberOfLikes = len(likes)
+	statistics.append({"label": "Number Of Likes", "value": numberOfLikes})
+
+	# get most similar musical act
+	mostSimilar = getSimilarMusicalActs(id, matrix)[0]
+	statistics.append({"label": "Most Similar Musical Act", "value": mostSimilar[0].title})
+
+	rates = []
+	for like in likes:
+		rates.append(like.rate)
+
+	# get the average rate 
+	avgRate = round(float(sum(rates))/float(len(rates)), 2)
+	statistics.append({"label": "Average Value of Rates", "value": avgRate})	
+
+	# get the maximum rate
+	maxRate = max(rates)
+	statistics.append({"label": "Maximum Value of Rates", "value": maxRate})
+
+	# get the minimum rate
+	minRate = min(rates)
+	statistics.append({"label": "Minimum Value of Rates", "value": minRate})
+
+	# get the standard desviation
+	sumPot = 0
+	variancia = 0
+	for rate in rates:
+		sumPot += math.pow((rate-avgRate),2)
+	variancy = round(float(sumPot)/float(len(rates)), 2)
+	stdDevRates = round(float(math.sqrt(variancy)), 2)
+	statistics.append({"label": "Standard Deviaton of Rates", "value": stdDevRates})
+
+    # return the statistics
+	return statistics
+# def getMusicalActStatistics()
+
+
 def getMusicalActSugestion(login, matrix):
 	"""
 	This method gets the musical act sugestion which is represented by a list,
@@ -302,7 +381,6 @@ def getMusicalActSugestion(login, matrix):
 		for j in range(1,356):
 			if (matrix[str(act.musicalAct_id)][str(j)] > 1) and (j not in myActs):
 				sugestoes[str(j)] += matrix[str(act.musicalAct_id)][str(j)]
-
 
 	# build the sugestion list
 	for i in range(1, 356):
@@ -451,6 +529,57 @@ def getSimilarity(vec1, vec2):
 	# return the similarity
 	return resultado
 # def def getSimilarity()
+
+
+def getSimilarMusicalActs(musicalActId, matrix):
+	"""
+	This method gets the 10 similarest musical acts of a musical act
+	represented by musicalActId.
+
+	@param musicalActId: Primary key from muscal act table
+	@type musicalActId: string
+
+	@param matrix: recomendation matrix
+	@type matrix: dictionary
+
+	@rtype: list
+	@returns: a list with the top 10 similarest musical acts.
+	"""
+	# get list of musical acts from matrix
+	similarList = []
+	for i in range(1, 356):
+		musicalAct = getMusicalAct(i)
+		similarList.append((musicalAct, int(matrix[str(musicalActId)][str(i)])))
+
+	# sort list
+	topTen = sorted(similarList, key=getKey, reverse=True)
+
+	# return the top 10
+	return topTen[0:10]
+# def getSimilarMusicalActs()
+
+
+def getTopTenMusicalActs():
+	"""
+	This method get the top 10 musical acts in musiclounge.
+
+	@rtype: list
+	@returns: the list with the 10 most liked musical acts.
+	"""
+	# initialize list
+	topTen = []
+
+	# get the likes
+	for i in range(1, 356):
+		likes = len(models.MusicalActRate.objects.filter(musicalAct__id=i))
+		topTen.append((i, likes))
+
+	# sort list
+	topTen = sorted(topTen, key=getKey, reverse=True)
+
+	# return the list
+	return topTen[0:10]
+# def getTopTenMusicalActs()
 
 
 def getUser(login):
@@ -609,8 +738,14 @@ def getUserMessage(login):
 	@rtype: Dictionary
 	@returns: A Dictionary containing the message and it's type.
 	"""
+	# get all users
+	allUsers = models.User.objects.all()
+
 	# try to get blocking reasons:
 	blockings = models.BlockingReason.objects.filter(blocking__blocked__login=login)
+
+	# get blockings by allUsers
+	percentage = round(float(len(blockings))/float(len(allUsers)), 2)
 
 	# instantiate the reason list
 	reasonList = []
@@ -624,7 +759,7 @@ def getUserMessage(login):
 	s = 0
 	a = 0
 	p = 0
-	print reasonList
+	
 	if reasonList:
 		s = reasonList.count("Spammer")
 		a = reasonList.count("Abusive Content")
@@ -633,15 +768,16 @@ def getUserMessage(login):
 	message = {}
 
 	# select the message based on blocking reasons or ramdomic choose one
-	if (s>=5) and (s>a) and (s>p):
-		message["text"] = "Take care with sending spams!!! Many people may not be pleased with that !"
-		message["type"] = "warning"
-	elif (a>=5) and (a>s) and (a>p):
-		message["text"] = "Take care with what you post here !!! Be respectful with your Music Lounge Mates!"
-		message["type"] = "warning"
-	elif (p>=5) and (p>a) and (p>s):		
-		message["text"] = "Be nice with your Music Lounge Mates!!! They're here to enjoy too !"
-		message["type"] = "warning"
+	if (percentage > 0.3):
+		if (s>a) and (s>p) :
+			message["text"] = "Take care with sending spams!!! Many people may not be pleased with that !"
+			message["type"] = "warning"
+		elif (a>s) and (a>p):
+			message["text"] = "Take care with what you post here !!! Be respectful with your Music Lounge Mates!"
+			message["type"] = "warning"
+		elif (p>a) and (p>s):		
+			message["text"] = "Be nice with your Music Lounge Mates!!! They're here to enjoy too !"
+			message["type"] = "warning"
 	else:
 		index = randint(0, len(MESSAGES)-1)
 		message["text"] = MESSAGES[index]
@@ -663,10 +799,148 @@ def getUserMusicalActs(login):
 	"""
 	# get musical acts liked by the user
 	musicalActs = models.MusicalActRate.objects.filter(user__login=login).order_by('musicalAct')
-	
+
 	# return musicalActs
 	return musicalActs
 # def getUserMusicalActs()
+
+
+def getUserStatistics(requester):
+	"""
+	This method calculate severous statistics from user.
+
+	@param requester: primary key of user's table to requester
+	@type requester: string
+
+	@rtype: Dictionary
+	@returns: Dictionary containing the calculated statistics
+	"""
+	# initialize variable
+	statistics = []
+
+	# get user data
+	user = models.User.objects.get(login=requester)
+	#statistics.append({"label": "User", "value": user})
+
+	# get number of friends
+	numberOfFriends = len(models.Friendship.objects.filter(user__login=requester))
+	statistics.append({"label": "Number Of Friends", "value":numberOfFriends, "free" : True})
+
+	# get number of users
+	numberOfUsers = len(models.User.objects.all())
+	statistics.append({"label": "Number of Users", "value":numberOfUsers, "free" : True})
+
+	# get percentual of users that are friends
+	percentualFriendsUser = round(float(numberOfFriends)/float(numberOfUsers)*100, 2)
+	statistics.append({"label": "Percentage of Users Who Are Friends (%)", "value": percentualFriendsUser, "free" : True})
+
+	# get friends that are from user's city
+	friendsFromCity = len(models.Friendship.objects.filter(user__login=requester, 
+		                                                   user__city=user.city))
+	statistics.append({"label":"Friends From Same City", "value": friendsFromCity, "free" : True})
+
+
+	# get number of musical acts liked
+	numberOfMusicalActsLiked = len(models.MusicalActRate.objects.filter(user__login=requester))
+	statistics.append({"label":"Number Of Liked Musical Acts", "value":numberOfMusicalActsLiked, "free" : True})
+
+	# get all musical acts
+	numberOfMusicalActs = len(models.MusicalAct.objects.all())
+	statistics.append({"label":"Number Of Musical Acts", "value":numberOfMusicalActs, "free" : True})
+
+	# get percentual of musical acts liked
+	percentualMusicalActUser = round(float(numberOfMusicalActsLiked)/float(numberOfMusicalActs)*100, 2)
+	statistics.append({"label":"Percentage of Musical Acts That I Liked (%)", "value":percentualMusicalActUser, "free" : True})
+
+	# get number of people that you blocked
+	numberOfMyEnemies = len(models.Blocking.objects.filter(blocker__login=requester))
+	statistics.append({"label":"Number Of Blocked Users", "value": numberOfMyEnemies, "free" : False})
+
+	# get percentual of enemies
+	percentualEnemiesUser = round(float(numberOfMyEnemies)/float(numberOfUsers)*100, 2)
+	statistics.append({"label":"Percentage of Users That I Blocked (%)", "value": percentualEnemiesUser, "free" : False})
+
+	# get reasons
+	allMyBlockingReasons = models.BlockingReason.objects.filter(blocking__blocker__login=requester)
+
+	# get number of each my reasons
+	reasonS = 0
+	reasonA = 0
+	reasonP = 0
+	for blocking in allMyBlockingReasons:
+		if blocking.reason == "Spammer":
+			reasonS += 1
+		elif blocking.reason == "Abusive Content":
+			reasonA += 1
+		elif blocking.reason == "Personal Reasons":
+			reasonP += 1
+	statistics.append({"id": "my", "label": "Spammer", "value":reasonS, "free" : False})
+	statistics.append({"id": "my", "label": "Abusive Content", "value":reasonA, "free" : False})
+	statistics.append({"id": "my", "label": "Personal Reasons", "value":reasonP, "free" : False})
+
+	# get number of people that blocked you
+	numberOfIdiots = len(models.Blocking.objects.filter(blocked__login=requester))
+	statistics.append({"label":"Number Of Users Who Blocked Me", "value":numberOfIdiots, "free" : False})
+
+	# get percentual of idiots
+	percentualIdiotsUser = round(float(numberOfIdiots)/float(numberOfUsers)*100, 2)
+	statistics.append({"label":"Percentage of Users That Blocked Me (%)", "value": percentualIdiotsUser, "free" : False})
+
+	# get their reasons
+	allTheirBlockingReasons = models.BlockingReason.objects.filter(blocking__blocked__login=requester)
+
+	# get number of each their reasons
+	reasonS = 0
+	reasonA = 0
+	reasonP = 0
+	for blocking in allTheirBlockingReasons:
+		if blocking.reason == "Spammer":
+			reasonS += 1
+		elif blocking.reason == "Abusive Content":
+			reasonA += 1
+		elif blocking.reason == "Personal Reasons":
+			reasonP += 1
+
+	statistics.append({"id": "their", "label": "Spammer", "value":reasonS, "free" : False})
+	statistics.append({"id": "their", "label": "Abusive Content", "value":reasonA, "free" : False})
+	statistics.append({"id": "their", "label": "Personal Reasons", "value":reasonP, "free" : False})
+
+	return statistics
+# def getUserStatistics()
+
+
+def likeMusicalAct(requester, musicalActId, rate):
+	"""
+	This method send to database the information that the requester likes
+	the musical act and set it a rate value.
+
+	@param requester: primary key of user's table to requester
+	@type requester: string
+
+	@param musicalActId: Primary key of musical act's table
+	@type musicalActId: string
+
+	@param rate: the value (0 to 5) attributed by user to musical act
+	@type rate: Integer
+
+	@rtype: boolean
+	@returns: True
+	"""
+	# get musical act
+	musicalAct = getMusicalAct(musicalActId)
+
+	# get user from requester
+	user = getUser(requester)
+
+	# build the object to MusicalActRate table
+	dbObj = models.MusicalActRate(musicalAct=musicalAct, user=user, rate=rate)
+
+	# save object in database
+	dbObj.save()
+
+	# return true
+	return True
+# def likeMusicalAct()
 
 
 def updateUser(data):

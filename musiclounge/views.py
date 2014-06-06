@@ -117,12 +117,27 @@ def home(request, login):
 			for sugestion in musicalActSugestion:
 				
 				ato = api.getMusicalAct(sugestion[0])
-				nota = {"banda": ato,
-				        "nota": sugestion[1]}
+				nota = {"musicalAct": ato,
+				        "rate": sugestion[1]}
 				musicalActSugestionComplete.append(nota)
 
-		# insert the sugestion in context
-		context['musicalActSugestion'] = musicalActSugestionComplete
+	# there is no sugestio: send the top 10
+	else:
+
+		# get top 10
+		sugestions = api.getTopTenMusicalActs()
+		
+		# build the response
+		for sugestion in sugestions:
+			ato = api.getMusicalAct(sugestion[0])
+			nota = {"musicalAct": ato,
+			        "rate": sugestion[1]}
+			musicalActSugestionComplete.append(nota)
+
+
+	# insert the sugestion in context
+	context['musicalActSugestion'] = musicalActSugestionComplete
+
 
 	# user have friends sugestion: assignt it to context
 	if friendSugestion:
@@ -162,6 +177,12 @@ def home(request, login):
 	# message is ready: assign it in context
 	if message:
 		context["message"] = message
+
+	# get statistics
+	statistics = api.getUserStatistics(login)
+
+	if statistics:
+		context["statistics"] = statistics
 
 	# build the http response 
 	response = render(request, 'home.html', context)
@@ -292,6 +313,44 @@ def logout(request):
 # def logout()
 
 
+def managerMusicalActLikes(request, musicalActId):
+	"""
+	This method implements the all the management of musical acts likes.
+
+	@param musicalActId: The primary key of musicalAct table
+	@type blocked: string
+
+	@param request: The http request to view
+	@type request: django.http.response.HttpResponse
+
+	@returns: A http response 
+	@rtype: django.http.response.HttpResponse
+	"""
+	
+	# get requester
+	requester = request.session["userLogin"]
+
+	# button was pressed: deal with it
+	if "button" in request.POST:
+
+		# requester wants to like musical act: add it
+		if request.POST["button"] == "Like Musical Act":
+			if 'rate' in request.POST and request.POST['rate']:
+				rate = request.POST['rate']
+			api.likeMusicalAct(requester, musicalActId, rate)
+
+		# requester wants to dislike musical ackt: remove it
+		if request.POST["button"] == "Dislike Musical Act":
+			api.dislikeMusicalAct(requester, musicalActId)
+
+	# build the http response redirecting to home
+	response = HttpResponseRedirect(reverse('musiclounge:musicalAct', 
+	       		kwargs={'id': musicalActId}))
+
+	return response
+# def managerRelationship()
+
+
 def managerRelationship(request, user):
 	"""
 	This method implements the all the management of relationships
@@ -347,8 +406,11 @@ def musicalAct(request, id):
 	@returns: A http response 
 	@rtype: django.http.response.HttpResponse
 	"""
+	# get requester login
+	requester = request.session["userLogin"]
+	
 	# assign context
-	context = {"requester": request.session["userLogin"]}
+	context = {"requester": requester}
 
 	# get the musical act
 	musicalAct = api.getMusicalAct(id)
@@ -383,6 +445,31 @@ def musicalAct(request, id):
 		# assign to context
 		context['musicalAct'] = musicalAct
 		context['musicalActForm'] = musicalActForm
+
+	# get the musical acts liked by requester:
+	requesterMusicalActs = api.getUserMusicalActs(requester)
+
+	# check if requester already like this musical act
+	requesterLikesThis = False
+	for act in requesterMusicalActs:
+		if str(act.musicalAct.id) == str(id):
+			requesterLikesThis = True
+
+	# assign to context
+	context["requesterLikesThis"] = requesterLikesThis
+
+	# get similar musical acts
+	similarMusicalActs = api.getSimilarMusicalActs(id, request.session["matrix"])
+	topTen = []
+	if similarMusicalActs:
+		for act in similarMusicalActs:
+			topTen.append({"musicalAct": act[0]})
+		context["similarMusicalActs"] = topTen
+
+	# get statistics
+	statistics = api.getMusicalActStatistics(id, request.session["matrix"])
+	if statistics:
+		context["statistics"] = statistics
 
 	# build the response
 	response = render(request, 'musicalact.html', context)
@@ -497,7 +584,6 @@ def updateUser(request):
 			# create user
 			api.updateUser(userForm.cleaned_data)
 
-
 			# build the http response redirecting to home
 			response = HttpResponseRedirect(reverse('musiclounge:home', 
 			       		kwargs={'login': userForm.cleaned_data['login']}))
@@ -577,6 +663,10 @@ def user(request, login):
 
 	# assign to context
 	context["blockForm"] = blockForm
+
+	statistics = api.getUserStatistics(requester)
+	if statistics:
+		context["statistics"] = statistics
 
 	# build the response
 	response = render(request, 'profile.html', context)
